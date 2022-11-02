@@ -1,5 +1,6 @@
 from statistics import mean
-from numpy import array, average
+# from numpy import array, average
+import numpy
 
 EACH_CLASS_LENGTH = 50
 AMOUNT_OF_PARAMETERS = 4
@@ -40,8 +41,26 @@ class Bayes:
             # print(*map(mean, zip(*iris_versicolor)))
             # print(*map(mean, zip(*iris_verginica)))
 
-            satosa_sepal_len_el = [[x for x in sublist[0]] for sublist in iris_setosa]
+            satosa_sepal_len_el = [x[0] for x in iris_setosa]
+            satosa_sepal_wid_el = [x[1] for x in iris_setosa]
+            satosa_petal_len_el = [x[2] for x in iris_setosa]
+            satosa_petal_wid_el = [x[3] for x in iris_setosa]
             print(satosa_sepal_len_el)
+            print(satosa_sepal_wid_el)
+            print(satosa_petal_len_el)
+            print(satosa_petal_wid_el)
+
+            satosa_sepal_len_el_std = numpy.std(satosa_sepal_len_el)
+            satosa_sepal_wid_el_std = numpy.std(satosa_sepal_wid_el)
+            satosa_petal_len_el_std = numpy.std(satosa_petal_len_el)
+            satosa_petal_wid_el_std = numpy.std(satosa_petal_wid_el)
+
+
+            print(satosa_sepal_len_el_std)
+            print(satosa_sepal_wid_el_std)
+            print(satosa_petal_len_el_std)
+            print(satosa_petal_wid_el_std)
+
 
 
 b1 = Bayes('iris.data')
