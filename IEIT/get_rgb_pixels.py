@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy
+import math
 import logging
 
 forest = Image.open('images/forest.png').convert("L")
@@ -48,9 +49,9 @@ water_matrix = split_list(water)
 forest_avg_pixel = list(numpy.mean(forest_matrix, axis=0))
 sand_avg_pixel = list(numpy.mean(sand_matrix, axis=0))
 water_avg_pixel = list(numpy.mean(water_matrix, axis=0))
-print(f"Forest AVG: {forest_avg_pixel}")
-print(f"Sand AVG: {sand_avg_pixel}")
-print(f"Water AVG: {water_avg_pixel}")
+# print(f"Forest AVG: {forest_avg_pixel}")
+# print(f"Sand AVG: {sand_avg_pixel}")
+# print(f"Water AVG: {water_avg_pixel}")
 
 
 def get_limits(pixel_avg):
@@ -66,14 +67,14 @@ def get_limits(pixel_avg):
 
 
 forest_limits = get_limits(forest_avg_pixel)
-print(f"Forest HIGH limit: {forest_limits[0]} \n"
-      f"Forest LOW limit: {forest_limits[1]}")
+# print(f"Forest HIGH limit: {forest_limits[0]} \n"
+#       f"Forest LOW limit: {forest_limits[1]}")
 sand_limits = get_limits(sand_avg_pixel)
-print(f"sand HIGH limit: {sand_limits[0]} \n"
-      f"sand LOW limit: {sand_limits[1]}")
+# print(f"sand HIGH limit: {sand_limits[0]} \n"
+#       f"sand LOW limit: {sand_limits[1]}")
 water_limits = get_limits(water_avg_pixel)
-print(f"water HIGH limit: {water_limits[0]} \n"
-      f"water LOW limit: {water_limits[1]}")
+# print(f"water HIGH limit: {water_limits[0]} \n"
+#       f"water LOW limit: {water_limits[1]}")
 
 
 def to_binary(pixels_matrix, h_limit, l_limit):
@@ -94,11 +95,11 @@ def to_binary(pixels_matrix, h_limit, l_limit):
 
 
 binary_forest = to_binary(forest_matrix, forest_limits[0], forest_limits[1])
-print(binary_forest)
+# print(binary_forest)
 binary_sand = to_binary(sand_matrix, sand_limits[0], sand_limits[1])
-print(binary_sand)
+# print(binary_sand)
 binary_water = to_binary(water_matrix, water_limits[0], water_limits[1])
-print(binary_water)
+# print(binary_water)
 
 
 def get_etalon(binary_matrix):
@@ -122,18 +123,18 @@ def get_etalon(binary_matrix):
         else:
             etalon.append(1)
 
-    print(f"counter_0: {counter_0}")
-    print(f"counter_1: {counter_1}")
+    # print(f"counter_0: {counter_0}")
+    # print(f"counter_1: {counter_1}")
 
     return etalon
 
 
-forest_bin_etalon = get_etalon(binary_forest)
-print(f"Forest ETALON: {forest_bin_etalon}")
-sand_bin_etalon = get_etalon(binary_sand)
-print(f"Sand ETALON: {sand_bin_etalon}")
-water_bin_etalon = get_etalon(binary_water)
-print(f"Water ETALON: {water_bin_etalon}")
+forest_etalon = get_etalon(binary_forest)
+# print(f"Forest ETALON: {forest_etalon}")
+sand_etalon = get_etalon(binary_sand)
+# print(f"Sand ETALON: {sand_etalon}")
+water_etalon = get_etalon(binary_water)
+# print(f"Water ETALON: {water_etalon}")
 
 
 def get_neighbor():
@@ -153,9 +154,9 @@ def calculate_distance(etalon_1: list, etalon_2: list):
     return distance
 
 
-forest_sand_distance = calculate_distance(forest_bin_etalon, sand_bin_etalon)
-forest_water_distance = calculate_distance(forest_bin_etalon, water_bin_etalon)
-water_sand_distance = calculate_distance(water_bin_etalon, sand_bin_etalon)
+forest_sand_distance = calculate_distance(forest_etalon, sand_etalon)
+forest_water_distance = calculate_distance(forest_etalon, water_etalon)
+water_sand_distance = calculate_distance(water_etalon, sand_etalon)
 print(forest_sand_distance)
 print(forest_water_distance)
 print(water_sand_distance)
@@ -166,5 +167,46 @@ def get_vector(binary_matrix, row_id):
     return binary_matrix[row_id]
 
 
-def optimize_radius():
-    pass
+def optimize_radius(base_matrix, neighbor_matrix, base_etalon):
+    """
+        Надходять два класи: базовий та сусід.
+        Рахуємо склільки реалізацій ближче до центру ніж радіус. Тобто порівнюємо спочатку в своєму класі з
+        еталоном(центром), а потім еталон з вектором сусіда
+    """
+    radius = 0
+
+    for x in range(51):
+        k1 = 0
+        k3 = 0
+
+        for i in range(50):
+            if calculate_distance(base_etalon, get_vector(base_matrix, i)) <= radius:
+                k1 += 1
+            if calculate_distance(base_etalon, get_vector(neighbor_matrix, i)) <= radius:
+                k3 += 1
+
+        k4 = 50 - k3
+        k2 = 50 - k1
+
+        t_d1 = k1 / 50
+        t_betta = k3 / 50
+        d1_b = t_d1 - t_betta
+
+        kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
+
+        print(f"KFE: {kfe}")
+        print(f"k1 = {k1}, k3 = {k3}")
+        print(f"k1 = {k1}, k3 = {k3}")
+
+        if t_d1 >= 0.5 > t_betta:
+            print(f"{radius} : True")
+        else:
+            print(f"{radius} : False")
+
+        radius += 1
+
+
+
+optimization = optimize_radius(forest_matrix, water_matrix, forest_etalon)
+print(optimization)
+
