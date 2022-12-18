@@ -2,37 +2,48 @@ from PIL import Image
 import numpy
 import logging
 
-forest = Image.open('forest_10.png').convert("L")
-sand = Image.open('sand_10.png').convert("L")
-water = Image.open('water_10.png').convert("L")
+forest = Image.open('images/forest.png').convert("L")
+sand = Image.open('images/field.png').convert("L")
+water = Image.open('images/road.png').convert("L")
 
 # forest_pixel_values = list(forest.getdata())
 # sand_pixel_values = list(sand.getdata())
 # water_pixel_values = list(water.getdata())
 
 
-def image_to_matrix(image):
-    """ func for converting image to matrix of RGBs """
-    matrix = []
-    sublist = []
+# def image_to_matrix(image):
+#     """ func for converting image to matrix of RGBs """
+#     matrix = []
+#     sublist = []
+#
+#     for x in list(image.getdata()):
+#         if len(sublist) < 10:
+#             sublist.append(x)
+#         elif len(sublist) == 10:
+#             matrix.append(sublist)
+#             sublist = []
+#             sublist.append(x)
+#
+#     return matrix
 
-    for x in list(image.getdata()):
-        if len(sublist) < 50:
-            sublist.append(x)
-        else:
-            matrix.append(sublist)
-            sublist = []
 
-    return matrix
+def split_list(image, wanted_parts=50):
+    alist = list(image.getdata())
+    length = len(alist)
+    return [alist[i*length // wanted_parts: (i+1)*length // wanted_parts] for i in range(wanted_parts)]
 
 
-forest_matrix = image_to_matrix(forest)
-sand_matrix = image_to_matrix(sand)
-water_matrix = image_to_matrix(water)
+# forest_matrix = image_to_matrix(forest)
+forest_matrix = split_list(forest)
+sand_matrix = split_list(sand)
+water_matrix = split_list(water)
 
-print(forest_matrix)
-print(sand_matrix)
-print(water_matrix)
+# print(len(forest.getdata()))
+# print(list(forest.getdata()))
+# print(forest_matrix)
+# print(forest_matrix2)
+# print(sand_matrix)
+# print(water_matrix)
 
 forest_avg_pixel = list(numpy.mean(forest_matrix, axis=0))
 sand_avg_pixel = list(numpy.mean(sand_matrix, axis=0))
@@ -91,8 +102,8 @@ print(binary_water)
 
 
 def get_etalon(binary_matrix):
-    counter_0 = [0] * 10
-    counter_1 = [0] * 10
+    counter_0 = [0] * 50
+    counter_1 = [0] * 50
 
     etalon = []
 
@@ -126,4 +137,34 @@ print(f"Water ETALON: {water_bin_etalon}")
 
 
 def get_neighbor():
+    neighbor_id = -1
+    distance = -1
+
+    pass
+
+
+def calculate_distance(etalon_1: list, etalon_2: list):
+    distance = 0
+
+    for x, y in zip(etalon_1, etalon_2):
+        if x != y:
+            distance += 1
+
+    return distance
+
+
+forest_sand_distance = calculate_distance(forest_bin_etalon, sand_bin_etalon)
+forest_water_distance = calculate_distance(forest_bin_etalon, water_bin_etalon)
+water_sand_distance = calculate_distance(water_bin_etalon, sand_bin_etalon)
+print(forest_sand_distance)
+print(forest_water_distance)
+print(water_sand_distance)
+
+
+def get_vector(binary_matrix, row_id):
+    """This function returns one row from binary matrix"""
+    return binary_matrix[row_id]
+
+
+def optimize_radius():
     pass
