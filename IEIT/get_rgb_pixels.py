@@ -207,6 +207,12 @@ def optimize_radius(base_matrix, neighbor_matrix, base_etalon):
 
 
 
-optimization = optimize_radius(forest_matrix, water_matrix, forest_etalon)
-print(optimization)
+optimization_forest = optimize_radius(binary_forest, binary_water, forest_etalon)
+print(optimization_forest)
+print('****************************')
+optimization_water = optimize_radius(binary_water, binary_forest, water_etalon)
+print(optimization_water)
+print('****************************')
+optimization_sand = optimize_radius(binary_sand, binary_water, sand_etalon)
+print(optimization_sand)
 
