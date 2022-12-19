@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy
 import math
+import json
 import pandas
 from prettytable import PrettyTable
 import logging
@@ -97,7 +98,6 @@ def to_binary(pixels_matrix, h_limit, l_limit):
 
     return binary_matrix
 
-
 binary_forest = to_binary(forest_matrix, forest_limits[0], forest_limits[1])
 # print(numpy.matrix(binary_forest))
 # print(pandas.DataFrame(binary_forest))
@@ -181,6 +181,8 @@ def optimize_radius(base_matrix, neighbor_matrix, base_etalon):
     radius = 0
     radius_table = PrettyTable(['Radius', 'Working Area', 'KFE'])
 
+    radius_dict = {}
+
     for x in range(51):
         k1 = 0
         k3 = 0
@@ -200,24 +202,29 @@ def optimize_radius(base_matrix, neighbor_matrix, base_etalon):
 
         kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
 
-        # print(f"KFE: {kfe}")
-        # print(f"k1 = {k1}, k3 = {k3}")
-        # print(f"k1 = {k1}, k3 = {k3}")
-
         if t_d1 >= 0.5 > t_betta:
-            # print(f"{radius} : True")
             radius_table.add_row([radius, 'True', kfe])
+            radius_dict[radius] = [True, kfe]
         else:
-            # print(f"{radius} : False")
             radius_table.add_row([radius, 'False', kfe])
+            radius_dict[radius] = [False, kfe]
 
         radius += 1
 
-    return radius_table
+    true_area_radiuses = {}
+    for key, value in radius_dict.items():
+        if value[0] is True:
+            true_area_radiuses[key] = value[1]
+
+    perfect_radius = max(true_area_radiuses, key=true_area_radiuses.get)
+    # print(perfect_radius)
+
+    return perfect_radius
 
 
-# optimization_forest = optimize_radius(binary_forest, binary_water, forest_etalon)
-# print(optimization_forest)
+optimization_forest = optimize_radius(binary_forest, binary_water, forest_etalon)
+print(optimization_forest)
+# print(json.dumps(optimization_forest, sort_keys=True, indent=4))
 # print('****************************')
 # optimization_water = optimize_radius(binary_water, binary_forest, water_etalon)
 # print(optimization_water)
@@ -230,38 +237,38 @@ SAND_RADIUS = 29
 WATER_RADIUS = 7
 
 
-def optimize_delta(max_delta, base_matrix, neighbor_matrix, base_etalon, radius):
-
-    delta_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
-
-    for x in range(max_delta):
-        k1 = 0
-        k3 = 0
-        for i in range(50):
-            if calculate_distance(base_etalon, get_vector(base_matrix, i)) <= radius:
-                k1 += 1
-            if calculate_distance(base_etalon, get_vector(neighbor_matrix, i)) <= radius:
-                k3 += 1
-
-        k4 = 50 - k3
-        k2 = 50 - k1
-
-        t_d1 = k1 / 50
-        t_betta = k3 / 50
-        d1_b = t_d1 - t_betta
-
-        kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
-
-        if t_d1 >= 0.5 > t_betta:
-            delta_table.add_row([radius, 'True', kfe])
-        else:
-            delta_table.add_row([radius, 'False', kfe])
-
-        print(delta_table)
-        delta_table.clear()
-        delta_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
-
-
-forest_delta = optimize_delta(50, binary_forest, binary_water, forest_etalon, FOREST_RADIUS)
-print(forest_delta)
+# def optimize_delta(max_delta, base_matrix, neighbor_matrix, base_etalon, radius):
+#
+#     delta_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
+#
+#     for x in range(max_delta):
+#         k1 = 0
+#         k3 = 0
+#         for i in range(50):
+#             if calculate_distance(base_etalon, get_vector(base_matrix, i)) <= radius:
+#                 k1 += 1
+#             if calculate_distance(base_etalon, get_vector(neighbor_matrix, i)) <= radius:
+#                 k3 += 1
+#
+#         k4 = 50 - k3
+#         k2 = 50 - k1
+#
+#         t_d1 = k1 / 50
+#         t_betta = k3 / 50
+#         d1_b = t_d1 - t_betta
+#
+#         kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
+#
+#         if t_d1 >= 0.5 > t_betta:
+#             delta_table.add_row([radius, 'True', kfe])
+#         else:
+#             delta_table.add_row([radius, 'False', kfe])
+#
+#         print(delta_table)
+#         delta_table.clear()
+#         delta_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
+#
+#
+# forest_delta = optimize_delta(50, binary_forest, binary_water, forest_etalon, FOREST_RADIUS)
+# print(forest_delta)
 

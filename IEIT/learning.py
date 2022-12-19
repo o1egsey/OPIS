@@ -4,25 +4,28 @@ import math
 from prettytable import PrettyTable
 
 
-class Learning:
+class RecognClass:
 
     def __init__(self, filename):
         self.filename = filename
         self.delta = 20
+        self.size = 50
         self.matrix = []
         self.binary_matrix = []
         self.avg_vector = []
         self.higher_limit = []
         self.lower_limit = []
         self.etalon_vector = []
+        self.perfect_radius = 0
+        # self.neighbor_id = 0
 
-    def image_to_matrix(self, size=50):
+    def image_to_matrix(self):
         """Convert image to matrix with values of pixel RGBs"""
         image = Image.open(self.filename).convert("L")
         alist = list(image.getdata())
         length = len(alist)
-        self.matrix = [alist[i * length // size: (i + 1) * length // size] for i in range(size)]
-        return [alist[i * length // size: (i + 1) * length // size] for i in range(size)]
+        self.matrix = [alist[i * length // self.size: (i + 1) * length // self.size] for i in range(self.size)]
+        return [alist[i * length // self.size: (i + 1) * length // self.size] for i in range(self.size)]
 
     def get_avg_vector(self):
         self.avg_vector = list(numpy.mean(self.matrix, axis=0))
