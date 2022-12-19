@@ -17,7 +17,7 @@ class RecognClass:
         self.lower_limit = []
         self.etalon_vector = []
         self.perfect_radius = 0
-        # self.neighbor_id = 0
+        self.neighbor_id = 0
 
     def image_to_matrix(self):
         """Convert image to matrix with values of pixel RGBs"""

@@ -5,25 +5,65 @@ import math
 from prettytable import PrettyTable
 
 from learning import RecognClass
+# from proba import classes
 
 
 class IEIT:
 
-    def __init__(self, *rec_classes):
-        self.rec_classes = rec_classes
+    def __init__(self, etalons):
+        self.etalons = etalons
 
-    @staticmethod
-    def calculate_distance(etalon_1, etalon_2):
+    # @staticmethod
+    # def calculate_distance(etalon_1, etalon_2):
+    #     distance = 0
+    #
+    #     for x, y in zip(etalon_1, etalon_2):
+    #         if x != y:
+    #             distance += 1
+    #
+    #     return distance
+
+    def calculate_distance(self):
+        distances = []
         distance = 0
-
-        for x, y in zip(etalon_1, etalon_2):
+        for x, y in zip(self.etalons[0], self.etalons[1]):
             if x != y:
                 distance += 1
 
-        return distance
+        distances.append(distance)
+        distance = 0
+        for x, y in zip(self.etalons[0], self.etalons[2]):
+            if x != y:
+                distance += 1
+        distances.append(distance)
+        distance = 0
+        for x, y in zip(self.etalons[1], self.etalons[2]):
+            if x != y:
+                distance += 1
+        distances.append(distance)
+
+        return distances
 
     def get_neighbor(self):
         pass
+
+
+forest_class = RecognClass('images/forest.png')
+field_class = RecognClass('images/field.png')
+road_class = RecognClass('images/road.png')
+
+classes = [forest_class, field_class, road_class]
+for clas in classes:
+    clas.image_to_matrix()
+    clas.get_avg_vector()
+    clas.get_limits()
+    clas.matrix_to_binary()
+    clas.get_etalon_vector()
+
+etalons = [forest_class.etalon_vector, field_class.etalon_vector, road_class.etalon_vector]
+
+ieit = IEIT(etalons)
+print(ieit.calculate_distance())
 
     # def optimize_radius(self):
     #     """
@@ -74,6 +114,6 @@ class IEIT:
     #
     #     return perfect_radius
 
-    def optimize_delta(self):
-        pass
+    # def optimize_delta(self):
+    #     pass
 
