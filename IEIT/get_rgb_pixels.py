@@ -1,7 +1,11 @@
 from PIL import Image
 import numpy
 import math
+import pandas
+from prettytable import PrettyTable
 import logging
+
+DELTA = 20
 
 forest = Image.open('images/forest.png').convert("L")
 sand = Image.open('images/field.png').convert("L")
@@ -59,8 +63,8 @@ def get_limits(pixel_avg):
     low_limit = []
     index = 0
     for pixel in pixel_avg:
-        high_limit.append(pixel_avg[index] + 20)
-        low_limit.append(pixel_avg[index] - 20)
+        high_limit.append(pixel_avg[index] + DELTA)
+        low_limit.append(pixel_avg[index] - DELTA)
         index += 1
 
     return high_limit, low_limit
@@ -95,7 +99,8 @@ def to_binary(pixels_matrix, h_limit, l_limit):
 
 
 binary_forest = to_binary(forest_matrix, forest_limits[0], forest_limits[1])
-# print(binary_forest)
+# print(numpy.matrix(binary_forest))
+# print(pandas.DataFrame(binary_forest))
 binary_sand = to_binary(sand_matrix, sand_limits[0], sand_limits[1])
 # print(binary_sand)
 binary_water = to_binary(water_matrix, water_limits[0], water_limits[1])
@@ -174,6 +179,7 @@ def optimize_radius(base_matrix, neighbor_matrix, base_etalon):
         еталоном(центром), а потім еталон з вектором сусіда
     """
     radius = 0
+    radius_table = PrettyTable(['Radius', 'Working Area', 'KFE'])
 
     for x in range(51):
         k1 = 0
@@ -194,25 +200,68 @@ def optimize_radius(base_matrix, neighbor_matrix, base_etalon):
 
         kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
 
-        print(f"KFE: {kfe}")
-        print(f"k1 = {k1}, k3 = {k3}")
-        print(f"k1 = {k1}, k3 = {k3}")
+        # print(f"KFE: {kfe}")
+        # print(f"k1 = {k1}, k3 = {k3}")
+        # print(f"k1 = {k1}, k3 = {k3}")
 
         if t_d1 >= 0.5 > t_betta:
-            print(f"{radius} : True")
+            # print(f"{radius} : True")
+            radius_table.add_row([radius, 'True', kfe])
         else:
-            print(f"{radius} : False")
+            # print(f"{radius} : False")
+            radius_table.add_row([radius, 'False', kfe])
 
         radius += 1
 
+    return radius_table
 
 
-optimization_forest = optimize_radius(binary_forest, binary_water, forest_etalon)
-print(optimization_forest)
-print('****************************')
-optimization_water = optimize_radius(binary_water, binary_forest, water_etalon)
-print(optimization_water)
-print('****************************')
-optimization_sand = optimize_radius(binary_sand, binary_water, sand_etalon)
-print(optimization_sand)
+# optimization_forest = optimize_radius(binary_forest, binary_water, forest_etalon)
+# print(optimization_forest)
+# print('****************************')
+# optimization_water = optimize_radius(binary_water, binary_forest, water_etalon)
+# print(optimization_water)
+# print('****************************')
+# optimization_sand = optimize_radius(binary_sand, binary_water, sand_etalon)
+# print(optimization_sand)
+
+FOREST_RADIUS = 9
+SAND_RADIUS = 29
+WATER_RADIUS = 7
+
+
+def optimize_delta(max_delta, base_matrix, neighbor_matrix, base_etalon, radius):
+
+    delta_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
+
+    for x in range(max_delta):
+        k1 = 0
+        k3 = 0
+        for i in range(50):
+            if calculate_distance(base_etalon, get_vector(base_matrix, i)) <= radius:
+                k1 += 1
+            if calculate_distance(base_etalon, get_vector(neighbor_matrix, i)) <= radius:
+                k3 += 1
+
+        k4 = 50 - k3
+        k2 = 50 - k1
+
+        t_d1 = k1 / 50
+        t_betta = k3 / 50
+        d1_b = t_d1 - t_betta
+
+        kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
+
+        if t_d1 >= 0.5 > t_betta:
+            delta_table.add_row([radius, 'True', kfe])
+        else:
+            delta_table.add_row([radius, 'False', kfe])
+
+        print(delta_table)
+        delta_table.clear()
+        delta_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
+
+
+forest_delta = optimize_delta(50, binary_forest, binary_water, forest_etalon, FOREST_RADIUS)
+print(forest_delta)
 
