@@ -3,6 +3,8 @@ import numpy
 import math
 from prettytable import PrettyTable
 
+from IEIT import IEIT
+
 
 class RecognClass:
 
@@ -84,5 +86,55 @@ class RecognClass:
     def get_vector(self, row_id):
         """This function returns one row from binary matrix"""
         return self.binary_matrix[row_id]
+
+    def optimize_radius(self, neighbor_matrix):
+        """
+            Надходять два класи: базовий та сусід.
+            Рахуємо склільки реалізацій ближче до центру ніж радіус. Тобто порівнюємо спочатку в своєму класі з
+            еталоном(центром), а потім еталон з вектором сусіда
+        """
+        radius = self.perfect_radius
+        radius_table = PrettyTable(['Radius', 'Working Area', 'KFE'])
+
+        radius_dict = {}
+
+        for x in range(51):
+            k1 = 0
+            k3 = 0
+
+            for i in range(50):
+                if IEIT.calculate_distance(self.etalon_vector, self.get_vector(i)) <= radius:
+                    k1 += 1
+                if IEIT.calculate_distance(self.etalon_vector, neighbor_matrix.get_vector(i)) <= radius:
+                    k3 += 1
+
+            k4 = 50 - k3
+            k2 = 50 - k1
+
+            t_d1 = k1 / 50
+            t_betta = k3 / 50
+            d1_b = t_d1 - t_betta
+
+            kfe = d1_b * math.log(1.0 + d1_b + 0.1) / (1.0 - d1_b + 0.1) / math.log(2.0)
+
+            if t_d1 >= 0.5 > t_betta:
+                radius_table.add_row([radius, 'True', kfe])
+                radius_dict[radius] = [True, kfe]
+            else:
+                radius_table.add_row([radius, 'False', kfe])
+                radius_dict[radius] = [False, kfe]
+
+            radius += 1
+
+        true_area_radiuses = {}
+        for key, value in radius_dict.items():
+            if value[0] is True:
+                true_area_radiuses[key] = value[1]
+
+        perfect_radius = max(true_area_radiuses, key=true_area_radiuses.get)
+        self.perfect_radius = perfect_radius
+        # print(perfect_radius)
+
+        return perfect_radius
 
 
