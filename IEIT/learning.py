@@ -87,13 +87,13 @@ class RecognClass:
         """This function returns one row from binary matrix"""
         return self.binary_matrix[row_id]
 
-    def optimize_radius(self, neighbor_matrix):
+    def optimize_radius(self, neighbor):
         """
             Надходять два класи: базовий та сусід.
             Рахуємо склільки реалізацій ближче до центру ніж радіус. Тобто порівнюємо спочатку в своєму класі з
             еталоном(центром), а потім еталон з вектором сусіда
         """
-        radius = self.perfect_radius
+        radius = 0
         radius_table = PrettyTable(['Radius', 'Working Area', 'KFE'])
 
         radius_dict = {}
@@ -105,7 +105,7 @@ class RecognClass:
             for i in range(50):
                 if IEIT.calculate_distance(self.etalon_vector, self.get_vector(i)) <= radius:
                     k1 += 1
-                if IEIT.calculate_distance(self.etalon_vector, neighbor_matrix.get_vector(i)) <= radius:
+                if IEIT.calculate_distance(self.etalon_vector, neighbor.get_vector(i)) <= radius:
                     k3 += 1
 
             k4 = 50 - k3
@@ -130,9 +130,11 @@ class RecognClass:
         for key, value in radius_dict.items():
             if value[0] is True:
                 true_area_radiuses[key] = value[1]
-
-        perfect_radius = max(true_area_radiuses, key=true_area_radiuses.get)
+        print(true_area_radiuses)
+        print(radius_dict)
+        perfect_radius = max(true_area_radiuses, key=true_area_radiuses.get, default=0)
         self.perfect_radius = perfect_radius
+        print(perfect_radius)
         # print(perfect_radius)
 
         return perfect_radius

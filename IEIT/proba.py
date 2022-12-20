@@ -51,21 +51,23 @@ def optimize_delta(classes, max_delta=50):
                 # print(c.lower_limit)
                 # print(c.higher_limit)
                 c.matrix_to_binary()
-                print(c.binary_matrix)
+                # print(c.binary_matrix)
                 c.get_etalon_vector()
                 # print(c.etalon_vector)
                 take_neighbor.get_neighbor()
                 # print(c.neighbor_id)
                 c.optimize_radius(classes[c.neighbor_id])
-                radius = c.perfect_radius
-                print(c.perfect_radius)
+
+                # radius = c.perfect_radius
+                # print(c.perfect_radius)
+                # print(f"DElta: {c.delta}")
                 radius_table = PrettyTable(['Delta', 'Working Area', 'KFE'])
                 k1 = 0
                 k3 = 0
                 for i in range(50):
-                    if IEIT.calculate_distance(c.etalon_vector, c.get_vector(i)) <= radius:
+                    if IEIT.calculate_distance(c.etalon_vector, c.get_vector(i)) <= c.perfect_radius:
                         k1 += 1
-                    if IEIT.calculate_distance(c.etalon_vector, classes[c.neighbor_id].get_vector(i)) <= radius:
+                    if IEIT.calculate_distance(c.etalon_vector, classes[c.neighbor_id].get_vector(i)) <= c.perfect_radius:
                         k3 += 1
                 t_d1 = k1 / 50
                 t_betta = k3 / 50
